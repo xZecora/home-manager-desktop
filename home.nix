@@ -3,10 +3,12 @@
 {
   imports = [
     ./modules/neovim/neovim.nix
-    #./modules/firefox.nix
     ./modules/gtk.nix
+    ./modules/emulation.nix
+    #./modules/firefox.nix
     #./modules/kdeconnect.nix
   ];
+
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "vitrial";
@@ -45,68 +47,36 @@
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = with pkgs; [
-    libation
-    nitrogen
-    dzen2
-    bat
+    jellyfin-media-player
+    jellyfin-mpv-shim
+    mpv                     # Media player
+    strawberry              # Audio player
+    libation                # Audible ripper
+    nitrogen                # Wallpaper setter
+    dzen2                   # Notification software
+    bat                     # Modern cat alternative
     xclip
-    zathura
-    rofi
-    ripgrep
-    #vesktop
-    #discord
-    #vencord
-    #spotify
-    appimage-run
+    zathura                 # PDF Viewer
+    rofi                    # dmenu backup
+    appimage-run            # Appimage runner
     obsidian
-    pcmanfm
-    neofetch
-    lazygit
-    pstree
-    localsend
-    spotifyd
-    r2modman
-    #atlauncher
-    #prismlauncher-unwrapped
-    gdlauncher-carbon
-    jdk
-    jdk21
-    lutris
-    #floorp
-    firefox
-    protontricks
-    htop
-    dolphin-emu
-    flameshot
+    pcmanfm                 # GUI file manager
+    neofetch                # yk what it is cuh
+    lazygit                 # Git TUI
+    spotifyd                # Headless spotify daemon
+    r2modman                # ROR mod manager
+    (pkgs.gdlauncher-carbon.overrideAttrs (_:{ # Minecraft mod manager and java
+      propagatedBuildInputs = [ jdk jdk21 ];
+    }))
+    floorp-bin              # Firefox fork
+    protontricks            # Winetricks for gaming
+    htop                    # System monitor
+    flameshot               #screenshot tool
     onlyoffice-desktopeditors
-    mumble
-    fluffychat
-    iamb
-    revolt-desktop
-    #(retroarch.override {
-    #  cores = with libretro; [
-    #    dolphin
-    #  ];
-    #})
-    # # Adds the 'hello' command to your environment. It prints a friendly
-    # # "Hello, world!" when run.
-    # pkgs.hello
-
-    # # It is sometimes useful to fine-tune packages, for example, by applying
-    # # overrides. You can do that directly here, just don't forget the
-    # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
-    # # fonts?
-    # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
-
-    # # You can also create simple shell scripts directly inside your
-    # # configuration. For example, this adds a command 'my-hello' to your
-    # # environment:
-    # (pkgs.writeShellScriptBin "my-hello" ''
-    #   echo "Hello, ${config.home.username}!"
-    # '')
+    mumble                  # Self-hosted VoIP server
+    fluffychat              # Matrix client
+    revolt-desktop          #Discord alternative
   ];
-
-  services.gnome-keyring.enable = true;
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.

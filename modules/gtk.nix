@@ -14,10 +14,10 @@
   #home.pointerCursor.gtk.enable = true;
   #home.pointerCursor.name = "Breeze-light";
 
-  #home.packages = [
+  home.packages = [
   #  pkgs.themechanger
-  #  pkgs.dconf
-  #];
+    pkgs.dconf
+  ];
 
   gtk = {
     enable = true;

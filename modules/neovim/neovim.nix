@@ -86,6 +86,7 @@ vim.g.rainbow_delimiters = {
 			                path = "~/Documents/obsidian",
 		                },
 	                },
+                  legacy_commands = false,
                 })'';
       }
       {
@@ -94,7 +95,7 @@ vim.g.rainbow_delimiters = {
       }
       {
         plugin = lualine-nvim;
-        config = toLua "require('lualine').setup({ options = {theme = 'PaperColor', },})";
+        config = toLua "require('lualine').setup({ options = {theme = 'auto', },})";
       }
       {
         plugin = nvim-tree-lua;
@@ -132,12 +133,16 @@ require("nvim-tree").setup({
         #config = "colorscheme onedark";
       }
       {
+        plugin = dracula-nvim;
+        #config = "colorscheme dracula";
+      }
+      {
         plugin = gruvbox;
         #config = "colorscheme gruvbox";
       }
       {
         plugin = vim-deus;
-        config = "colorscheme deus";
+        #config = "colorscheme deus";
       }
       {
         plugin = material-vim;
@@ -152,8 +157,29 @@ require("nvim-tree").setup({
         #config = "colorscheme tokyonight";
       }
       {
+        plugin = bamboo-nvim;
+        #config = toLua ''require('bamboo').setup({ transparent = true })
+        #  vim.cmd("colorscheme bamboo")'';
+      }
+      {
+        plugin = citruszest-nvim;
+        #config = toLua ''require('citruszest').setup({ option = { transparent = true } })
+        #  vim.cmd("colorscheme citruszest")'';
+
+      }
+      {
         plugin = palenightfall-nvim;
         #config = "colorscheme palenightfall";
+      }
+      {
+        plugin = kanagawa-nvim;
+        config = toLua ''require('kanagawa').setup({
+            transparent = false,
+            config = {
+              theme = "dragon",
+            } 
+          })
+          vim.cmd("colorscheme kanagawa")'';
       }
       {
         plugin = vim-gitgutter;
@@ -211,10 +237,11 @@ require("nvim-tree").setup({
       }
       {
         plugin = nvim-lspconfig;
-        config = toLua ''local lspconfig = require('lspconfig')
-                         lspconfig.clangd.setup({})
-                         lspconfig.lua_ls.setup({})
-                         lspconfig.texlab.setup({})'';
+        #config = toLua ''local lspconfig = require('lspconfig')
+        config = toLua ''vim.lsp.enable('clangd')
+                         vim.lsp.enable('lua_ls')
+                         vim.lsp.enable('bashls')
+                         vim.lsp.enable('texlab')'';
       }
       {
         plugin = none-ls-nvim;
@@ -305,6 +332,7 @@ end
       tree-sitter
       nodejs
       fd
+      git
     ];
   };
 }
