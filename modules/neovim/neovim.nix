@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   imports = [
@@ -6,12 +6,13 @@
     ./keybinds-nvim.nix
   ];
 
-  home.packages = with pkgs; [
-    neovide
-  ];
-
-  home.sessionVariables = {
-    EDITOR = "nvim";
+  home = {
+    packages = with pkgs; [
+      neovide
+    ];
+    sessionVariables = {
+      EDITOR = "nvim";
+    };
   };
 
   xdg.mimeApps.defaultApplications = {
@@ -26,10 +27,12 @@
     enable = true;
     vimAlias = true;
 
+    withPython3 = true;
+    withRuby = true;
+
     plugins = with pkgs.vimPlugins; [
       nvim-web-devicons
       vim-nix
-      gruvbox
       plenary-nvim
       cmp_luasnip
       friendly-snippets
@@ -40,15 +43,44 @@
       cmp-nvim-lsp
       vim-nixhash
       vim-cool
+      vim-illuminate
+      vim-gitgutter
+      targets-vim
+      # Tim Pope plugins
       vim-fugitive
+      vim-commentary
+      vim-surround 
+      # End Tim Pope plugins
+      (nvim-treesitter.withPlugins (p: [
+        p.tree-sitter-nix
+        p.tree-sitter-vim
+        p.tree-sitter-vimdoc
+        p.tree-sitter-bash
+        p.tree-sitter-lua
+        p.tree-sitter-odin
+        p.tree-sitter-regex
+        p.tree-sitter-latex
+        p.tree-sitter-markdown-inline
+        p.tree-sitter-markdown
+        p.tree-sitter-html
+        p.tree-sitter-yaml
+        p.tree-sitter-c
+        p.tree-sitter-cpp
+        p.tree-sitter-python
+        p.tree-sitter-angular
+      ]))
+      {
+        plugin = gitsigns-nvim;
+        config = toLua "require('gitsigns').setup({ signcolumn = false, })";
+      }
+      barbar-nvim
       {
         plugin = rainbow-delimiters-nvim;
         config = toLua ''
--- This module contains a number of default definitions
 local rainbow_delimiters = require 'rainbow-delimiters'
 
 ---@type rainbow_delimiters.config
-vim.g.rainbow_delimiters = {
+require('rainbow-delimiters.setup').setup {
     strategy = {
         [""] = rainbow_delimiters.strategy['global'],
         vim = rainbow_delimiters.strategy['local'],
@@ -72,22 +104,32 @@ vim.g.rainbow_delimiters = {
     },
 }'';
       }
-      {
-        plugin = nvim-notify;
-        config = toLua "vim.notify = require('notify')";
-      }
+      # {
+      #   plugin = nvim-notify;
+      #   config = toLua ''vim.notify = require('notify').setup({ background_colour = "#000000", })'';
+      # }
       {
       plugin = obsidian-nvim;
       config = toLua ''
                 require("obsidian").setup({
 	                workspaces = {
 		                {
-			                name = "obsidian",
-			                path = "~/Documents/obsidian",
+			                name = "Knowledge",
+			                path = "~/Documents/obsidian/Knowledge",
 		                },
 	                },
                   legacy_commands = false,
+                  ui = {
+                    enable = false,
+                  }
                 })'';
+      }
+      {
+        plugin = render-markdown-nvim;
+        config = toLua ''
+          require('render-markdown').setup({})
+          vim.cmd("let g:markdown_fenced_languages = ['c', 'bash', 'python', 'rust', 'cpp']")
+        '';
       }
       {
         plugin = ultimate-autopair-nvim;
@@ -112,7 +154,7 @@ vim.g.rainbow_delimiters = {
   vim.keymap.set('n', 'a',    api.fs.create, opts('Create File or Directory'))
   vim.keymap.set('n', '=',   api.tree.change_root_to_node,        opts('CD'))
   vim.keymap.set('n', '-',       api.tree.change_root_to_parent,      opts('Up'))
-  vim.cmd('hi NvimTreeNormal guibg=NONE')
+  -- vim.cmd('hi NvimTreeNormal guibg=NONE')
 end
 
 -- pass to setup along with your other options
@@ -120,81 +162,50 @@ require("nvim-tree").setup({
   on_attach = my_on_attach,
 })'';
       }
-      {
-        plugin = catppuccin-nvim;
-        #config = "colorscheme catppuccin";
-      }
-      {
-        plugin = papercolor-theme;
-        #config = "colorscheme PaperColor";
-      }
-      {
-        plugin = onedark-nvim;
-        #config = "colorscheme onedark";
-      }
-      {
-        plugin = dracula-nvim;
-        #config = "colorscheme dracula";
-      }
-      {
-        plugin = gruvbox;
-        #config = "colorscheme gruvbox";
-      }
-      {
-        plugin = vim-deus;
-        #config = "colorscheme deus";
-      }
-      {
-        plugin = material-vim;
-        #config = "colorscheme material";
-      }
+      # {
+        # plugin = everforest;
+        # config = ''
+          # let g:everforest_background = 'soft'
+          # let g:everforest_enable_italic = 1
+          # colorscheme everforest
+        # '';
+      # }
+      # {
+        # plugin = onedark-nvim;
+        # config = "colorscheme onedark";
+      # }
+      # {
+        # plugin = dracula-nvim;
+        # config = "colorscheme dracula";
+      # }
       {
         plugin = srcery-vim;
-        #config = "colorscheme srcery";
+         config = ''
+          let g:srcery_bg=['none', 'none']
+          "colorscheme srcery
+         '';
       }
       {
-        plugin = tokyonight-nvim;
-        #config = "colorscheme tokyonight";
-      }
-      {
-        plugin = bamboo-nvim;
-        #config = toLua ''require('bamboo').setup({ transparent = true })
-        #  vim.cmd("colorscheme bamboo")'';
-      }
-      {
-        plugin = citruszest-nvim;
-        #config = toLua ''require('citruszest').setup({ option = { transparent = true } })
-        #  vim.cmd("colorscheme citruszest")'';
+        plugin = gruvbox-nvim;
+        config = ''
+          if !(exists('g:neovide'))
+          lua << EOF
+            require("gruvbox").setup({
+              inverse = false,
+              transparent_mode = true,
+            })
+          EOF
+          else 
+          lua << EOF
+            require("gruvbox").setup({
+              inverse = false,
+            })
+          EOF
+          endif
 
+          colorscheme gruvbox
+          '';
       }
-      {
-        plugin = palenightfall-nvim;
-        #config = "colorscheme palenightfall";
-      }
-      {
-        plugin = kanagawa-nvim;
-        config = toLua ''require('kanagawa').setup({
-            transparent = false,
-            config = {
-              theme = "dragon",
-            } 
-          })
-          vim.cmd("colorscheme kanagawa")'';
-      }
-      {
-        plugin = vim-gitgutter;
-      }
-      (nvim-treesitter.withPlugins (p: [
-        p.tree-sitter-nix
-        p.tree-sitter-vim
-        p.tree-sitter-vimdoc
-        p.tree-sitter-bash
-        p.tree-sitter-lua
-        p.tree-sitter-odin
-        p.tree-sitter-regex
-        p.tree-sitter-markdown
-        p.tree-sitter-c
-      ]))
       {
         plugin = oil-nvim;
         config = toLua ''require('oil').setup({
@@ -207,6 +218,7 @@ require("nvim-tree").setup({
           })
           '';
       }
+      oil-git-nvim
       {
         plugin = vimtex;
         config = toLua ''vim.g.vimtex_view_method = "zathura"
@@ -228,20 +240,28 @@ require("nvim-tree").setup({
         config = toLua "require('telescope').load_extension('ui-select')";
       }
       {
-        plugin = noice-nvim;
-        config = toLua "require('noice').setup()";
-      }
-      {
         plugin = nvim-lastplace;
         config = toLua "require('nvim-lastplace').setup();";
       }
       {
         plugin = nvim-lspconfig;
         #config = toLua ''local lspconfig = require('lspconfig')
-        config = toLua ''vim.lsp.enable('clangd')
-                         vim.lsp.enable('lua_ls')
+        config = toLua ''vim.lsp.enable('lua_ls')
+                         vim.lsp.config('ccls', {
+                           init_options = {
+                           compilationDatabaseDirectory = "build";
+                           };
+                         })
+                         vim.lsp.enable('ccls')
+                         vim.lsp.enable('basedpyright')
+                         vim.lsp.enable('omnisharp')
                          vim.lsp.enable('bashls')
-                         vim.lsp.enable('texlab')'';
+                         vim.lsp.enable('nil_ls')
+                         vim.lsp.enable('zls')
+                         vim.lsp.enable('texlab')
+                         vim.lsp.enable('angularls')
+                         vim.cmd('hi link @lsp.typemod.variable.namespaceScope.c GruvboxAqua')
+                         vim.cmd('hi link @lsp.type.field.c GruvboxBlue')'';
       }
       {
         plugin = none-ls-nvim;
@@ -249,13 +269,40 @@ require("nvim-tree").setup({
                          null_ls.setup({
                            sources = {
                              null_ls.builtins.formatting.stylua,
-                             null_ls.builtins.diagnostics.proselint,
+                             null_ls.builtins.diagnostics.write_good,
+                             --null_ls.builtins.code_actions.proselint,
+                             --null_ls.builtins.diagnostics.proselint,
+                             --null_ls.builtins.completion.spell,
+                             -- Nix
+                             --null_ls.builtins.code-actions.statix,
+                             null_ls.builtins.diagnostics.statix,
+                             null_ls.builtins.formatting.nixfmt,
+                             -- Markdown
+                             --null_ls.builtins.code-actions.textlint,
+                             --null_ls.builtins.diagnostics.textlint,
+                             --null_ls.builtins.formatting.textlint,
+
+                             --null_ls.builtins.hover.dictionary,
+                             null_ls.builtins.completion.tags,
                            },
                          })'';
       }
       {
+        plugin = trouble-nvim;
+        config = toLua "require('trouble').setup({
+                          keys = {
+                            o = false,
+                            i = false,
+                          }
+                        })";
+      }
+      {
         plugin = luasnip;
         config = toLua ''require('luasnip.loaders.from_vscode').lazy_load()'';
+      }
+      {
+        plugin = alpha-nvim;
+        config = toLua ''require'alpha'.setup(require'alpha.themes.dashboard'.config)'';
       }
       {
         plugin = nvim-cmp;
@@ -283,7 +330,7 @@ end
                    ["<C-Space>"] = cmp.mapping.complete(),
                    ["<A-q>"] = cmp.mapping.abort(),
                    ["<CR>"] = cmp.mapping.confirm({ select = true }),
-                   ["<Tab>"] = cmp.mapping(function(fallback)
+                   ["<A-Tab>"] = cmp.mapping(function(fallback)
                                  if cmp.visible() then
                                    cmp.select_next_item()
                                  -- You could replace the expand_or_jumpable() calls with expand_or_locally_jumpable()
@@ -309,14 +356,38 @@ end
                    },
                    sources = cmp.config.sources({
                      { name = "nvim_lsp" },
-                     { name = "luasnip" },
+                     --{ name = "luasnip" },
+                     { name = "null_ls" },
+                     { name = "path" },
+                     --{ name = "cmdline" },
                    }, {
                      { name = "buffer" },
                    }),
                  })
                  '';
       }
+      {
+        plugin = nvim-colorizer-lua;
+        config = toLua "require('colorizer').setup()";
+      }
+      firenvim
+      {
+        plugin = noice-nvim;
+        # config = toLua "if vim.g.started_by_firenvim == false then require('noice').setup() end";
+        config = ''
+if !exists('g:started_by_firenvim')
+lua << EOF 
+  require('noice').setup()
+EOF
+endif
+'';
+      }
+      restore-view-vim
+      # omnisharp-extended-lsp-nvim
+      roslyn-nvim
     ];
+
+    extraLuaPackages = ps: [ ps.jsregexp ];
 
     extraPackages = with pkgs; [
       texliveFull
@@ -325,14 +396,34 @@ end
       llvmPackages_21.libcxx
       llvmPackages_21.libcxxStdenv
       llvmPackages_21.libcxxClang
-      clang-tools
+      #clang-tools
+      ccls
       stylua
-      proselint
+      #proselint
+      write-good
       texlab
       tree-sitter
       nodejs
       fd
       git
+      bash-language-server
+      lua-language-server
+      nil
+      pstree
+      statix
+      nixfmt
+      textlint
+      curl
+      obsidian
+      python314Packages.pylatexenc
+      zls
+      tree-sitter
+      # omnisharp-roslyn
+      roslyn
+      roslyn-ls
+      dotnetCorePackages.sdk_10_0-bin
+      angular-language-server
+      basedpyright
     ];
   };
 }

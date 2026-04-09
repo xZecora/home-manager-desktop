@@ -3,35 +3,30 @@
 {
   imports = [
     ./modules/neovim/neovim.nix
+    # ./nvf/nvf.nix
     ./modules/gtk.nix
     ./modules/emulation.nix
+    ./modules/zsh.nix
+    ./modules/small-stuff.nix
     #./modules/firefox.nix
     #./modules/kdeconnect.nix
   ];
 
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
-  home.username = "vitrial";
-  home.homeDirectory = "/home/vitrial";
+  home = {
+    username = "vitrial";
+    homeDirectory = "/home/vitrial";
+    stateVersion = "23.11"; # Please read the comment before changing.
+    sessionVariables = {
+      NIX_SHELL_PRESERVE_PROMPT = 1;
+    };
+  };
 
   nixpkgs.config.allowUnfree = true;
 
-  # This value determines the Home Manager release that your configuration is
-  # compatible with. This helps avoid breakage when a new Home Manager release
-  # introduces backwards incompatible changes.
-  #
-  # You should not change this value, even if you update Home Manager. If you do
-  # want to update the value, then make sure to first check the Home Manager
-  # release notes.
-  home.stateVersion = "23.11"; # Please read the comment before changing.
-
   services.dunst = {
     enable = true;
-  };
-
-  programs.kakoune = {
-    #enable = true;
-    #plugins = with pkgs.kakounePlugins; [ kak-fzf powerline-kak  kaktree];
   };
 
   systemd.user.services.steam = {
@@ -44,9 +39,40 @@
     };
   };
 
+  services.mpd = {
+    enable = true;
+    # musicDirectory = "/home/vitrial/.local/share/music";
+    musicDirectory = "/server/music";
+    extraConfig = ''
+      audio_output {
+      type "pipewire"
+      name "My PipeWire Output"
+    }'';
+  };
+
+  # systemd.user.services.mpd-mpris = {
+  #   Install = {
+  #     WantedBy = [ "default.target" ];
+  #   };
+  #   Unit = {
+  #     Description = "mpd-mpris";
+  #   };
+  #   Service = {
+  #     ExecStart = ''/home/vitrial/.nix-profile/bin/mpd-mpris'';
+  #   };
+  # };
+
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = with pkgs; [
+    tmux
+    xxHash
+    jftui
+    mpd-mpris
+    rmpc
+    spotifyd
+    mpc
+    any-nix-shell
     jellyfin-media-player
     jellyfin-mpv-shim
     mpv                     # Media player
@@ -54,29 +80,37 @@
     libation                # Audible ripper
     nitrogen                # Wallpaper setter
     dzen2                   # Notification software
-    bat                     # Modern cat alternative
     xclip
     zathura                 # PDF Viewer
-    rofi                    # dmenu backup
     appimage-run            # Appimage runner
-    obsidian
+    #obsidian
     pcmanfm                 # GUI file manager
-    neofetch                # yk what it is cuh
-    lazygit                 # Git TUI
-    spotifyd                # Headless spotify daemon
+    #spotifyd                # Headless spotify daemon
     r2modman                # ROR mod manager
     (pkgs.gdlauncher-carbon.overrideAttrs (_:{ # Minecraft mod manager and java
       propagatedBuildInputs = [ jdk jdk21 ];
     }))
     floorp-bin              # Firefox fork
+    librewolf
+    qutebrowser
     protontricks            # Winetricks for gaming
     htop                    # System monitor
     flameshot               #screenshot tool
     onlyoffice-desktopeditors
     mumble                  # Self-hosted VoIP server
     fluffychat              # Matrix client
-    revolt-desktop          #Discord alternative
+    revolt-desktop          # Discord alternative
+    teams-for-linux         # Microsoft teams
+    age
+    playerctl               # Lets me play/pause audio with keybinds
+    calibre
   ];
+
+  age = {
+    identityPaths = [ "/home/vitrial/.ssh/id_ed25519" ];
+    secrets = {
+    };
+  };
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.
@@ -109,14 +143,15 @@
   #
   #  /etc/profiles/per-user/vitrial/etc/profile.d/hm-session-vars.sh
   #
-  home.sessionVariables = {
-  };
 
-  programs.git = {
-    enable = true;
-    settings.user = {
-      name = "vitrial";
-      email = "vitrial@vitrial.xyz";
+  programs = {
+    git = {
+      enable = true;
+      settings.user = {
+        name = "vitrial";
+        email = "vitrial@vitrial.xyz";
+      };
+      signing.format = "openpgp";
     };
   };
 
@@ -132,4 +167,6 @@
   };
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
+
+  gtk.gtk4.theme = config.gtk.theme;
 }
