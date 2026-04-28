@@ -1,5 +1,11 @@
 { pkgs, config, ... }:
 {
+	programs.direnv = {
+		enable = true;
+		enableZshIntegration = true;
+		nix-direnv.enable = true;
+	};
+
   programs.zsh = {
     enable = true;
     enableCompletion = true;
@@ -65,9 +71,6 @@
       fi
     '';
 
-    #loginExtra = "";
-
-
     shellAliases = {
       rat = "startx ~/.xinitrc ratpoison"; # I don't wanna type all this to start my x server, I normally have more wm's
       zwm = "startx ~/.xinitrczwm"; # I don't wanna type all this to start my x server, I normally have more wm's
@@ -88,7 +91,7 @@
 
     oh-my-zsh = {
       enable = true;
-      plugins = [ "git" "fzf" "sudo" "zoxide" ];
+      plugins = [ "git" "fzf" "sudo" "zoxide" "direnv" ];
     };
   };
 

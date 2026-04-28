@@ -2,8 +2,8 @@
 
 {
   imports = [
-    ./modules/neovim/neovim.nix
-    # ./nvf/nvf.nix
+    # ./modules/neovim/neovim.nix
+    ./nvf/nvf.nix
     ./modules/gtk.nix
     ./modules/emulation.nix
     ./modules/zsh.nix
@@ -20,6 +20,7 @@
     stateVersion = "23.11"; # Please read the comment before changing.
     sessionVariables = {
       NIX_SHELL_PRESERVE_PROMPT = 1;
+			EDITOR = "nvim";
     };
   };
 
@@ -70,7 +71,6 @@
     jftui
     mpd-mpris
     rmpc
-    spotifyd
     mpc
     any-nix-shell
     jellyfin-media-player
@@ -85,7 +85,6 @@
     appimage-run            # Appimage runner
     #obsidian
     pcmanfm                 # GUI file manager
-    #spotifyd                # Headless spotify daemon
     r2modman                # ROR mod manager
     (pkgs.gdlauncher-carbon.overrideAttrs (_:{ # Minecraft mod manager and java
       propagatedBuildInputs = [ jdk jdk21 ];
